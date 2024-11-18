@@ -55,9 +55,9 @@
     chrome.storage.sync.get(
         {
             port: 12139,
-            detectClipboard: true,
-            mortalModelName: "4.0",
-            ui: "Classic",
+            detectClipboard: false,
+            mortalModelName: "4.1b",
+            ui: "KillerDucky",
             temperatureExists: false,
             temperature: 0,
             showRating: true
