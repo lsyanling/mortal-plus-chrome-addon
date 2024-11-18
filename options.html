@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Mortal Plus 配置</title>
+    </head>
+    <body>
+        服务器端口: <input id="serverPortInput" type="number" /><br>
+        <input id="detectClipboardInput" type="checkbox" />探测剪贴板<br>
+        模型版本: <input id="modelNameInput" type="text" /><br>
+        界面: <select id="uiSelect">
+            <option value="KillerDucky">KillerDucky</option>
+            <option value="Classic">Classic</option>
+        </select><br>
+        温度: <input id="temperatureInput" type="number" /><br>
+        <input id="showRatingInput" type="checkbox" />显示 rating<br>
+        恶手权重上限：<input id="badMoveUpperLimitInput" type="text" /><br>
+    
+        <button id="saveButton">保存</button>
+        <script src="options.js"></script>
+    </body>
+</html>

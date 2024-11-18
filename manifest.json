@@ -1,0 +1,52 @@
+{
+    "manifest_version": 3,
+    "name": "Mortal Plus",
+    "version": "2.0.0",
+    "description": "Mortal 魔氏辅助",
+    "permissions": [
+        "storage"
+    ],
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": false
+    },
+    "content_scripts": [
+        {
+            "js": ["i18n.js", "report.js"],
+            "matches": [
+                "https://mjai.ekyu.moe/report/*",
+                "http://mjai.ekyu.moe/report/*"
+            ]
+        },
+        {
+            "js": ["i18n.js", "killerducky_report.js"],
+            "css": ["killerducky_report.css"],
+            "matches": [
+                "*://mjai.ekyu.moe/killerducky/*"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "js": ["ready_review.js"],
+            "matches": [
+                "*://mjai.ekyu.moe/",
+                "*://mjai.ekyu.moe/zh-cn.html",
+                "*://mjai.ekyu.moe/ja.html",
+                "*://mjai.ekyu.moe/ko.html",
+                "*://mjai.ekyu.moe/ru.html"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "reviewer_index.js",
+                "get_report_data.js",
+                "get_round_data.js",
+                "get_round_index.js",
+                "set_action_index.js"
+            ],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
