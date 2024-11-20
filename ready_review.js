@@ -7,6 +7,7 @@
             text => {
                 if (text.match(/game.maj-soul.com\/1\/\?paipu=/)) {
                     // 填入链接
+                    text = text.replace("雀魂牌谱:", "");
                     const logUrls = document.getElementsByName("log-url");
                     if (logUrls.length !== 0) {
                         const logUrlInput = logUrls[0];
@@ -55,7 +56,7 @@
     chrome.storage.sync.get(
         {
             port: 12139,
-            detectClipboard: false,
+            detectClipboard: true,
             mortalModelName: "4.1b",
             ui: "KillerDucky",
             temperatureExists: false,

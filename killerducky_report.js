@@ -71,7 +71,7 @@
                 const roundActions = data;
                 if (roundActions === undefined || roundActions.entries === undefined) {
                     // 等待数据加载完成
-                    setTimeout(() => this.updateRound(roundIndex), 1000);
+                    setTimeout(() => this.updateRound(roundIndex), 100);
                     return;
                 }
                 for (const [i, action] of roundActions.entries()) {

@@ -33,7 +33,7 @@ const restoreOptions = () => {
     chrome.storage.sync.get(
         {
             port: 12139,
-            detectClipboard: false,
+            detectClipboard: true,
             mortalModelName: "4.1b",
             ui: "KillerDucky",
             temperatureExists: false,
