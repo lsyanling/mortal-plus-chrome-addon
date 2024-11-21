@@ -1,6 +1,7 @@
 {
     self.Flatted = function (n) { "use strict"; function t(n) { return t = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (n) { return typeof n } : function (n) { return n && "function" == typeof Symbol && n.constructor === Symbol && n !== Symbol.prototype ? "symbol" : typeof n }, t(n) } var r = JSON.parse, e = JSON.stringify, o = Object.keys, u = String, f = "string", i = {}, c = "object", a = function (n, t) { return t }, l = function (n) { return n instanceof u ? u(n) : n }, s = function (n, r) { return t(r) === f ? new u(r) : r }, y = function n(r, e, f, a) { for (var l = [], s = o(f), y = s.length, p = 0; p < y; p++) { var v = s[p], S = f[v]; if (S instanceof u) { var b = r[S]; t(b) !== c || e.has(b) ? f[v] = a.call(f, v, b) : (e.add(b), f[v] = i, l.push({ k: v, a: [r, e, b, a] })) } else f[v] !== i && (f[v] = a.call(f, v, S)) } for (var m = l.length, g = 0; g < m; g++) { var h = l[g], O = h.k, d = h.a; f[O] = a.call(f, O, n.apply(null, d)) } return f }, p = function (n, t, r) { var e = u(t.push(r) - 1); return n.set(r, e), e }, v = function (n, e) { var o = r(n, s).map(l), u = o[0], f = e || a, i = t(u) === c && u ? y(o, new Set, u, f) : u; return f.call({ "": i }, "", i) }, S = function (n, r, o) { for (var u = r && t(r) === c ? function (n, t) { return "" === n || -1 < r.indexOf(n) ? t : void 0 } : r || a, i = new Map, l = [], s = [], y = +p(i, l, u.call({ "": n }, "", n)), v = !y; y < l.length;)v = !0, s[y] = e(l[y++], S, o); return "[" + s.join(",") + "]"; function S(n, r) { if (v) return v = !v, r; var e = u.call(this, n, r); switch (t(e)) { case c: if (null === e) return e; case f: return i.get(e) || p(i, l, e) }return e } }; return n.fromJSON = function (n) { return v(e(n)) }, n.parse = v, n.stringify = S, n.toJSON = function (n) { return r(S(n)) }, n }({});
     let badMoveUpperLimit = 5;
+    let badMoveUpperLimit2 = 10;
     let server = "http://localhost:12139";
 
     let ratingExists = false;
@@ -9,6 +10,7 @@
     let badMove = "";
     let reportTime = "";
     let badMoveCount = 0;
+    let badMoveCount2 = 0;
     let actionCount = 0;
 
     const roundPreview = {
@@ -86,6 +88,8 @@
                             const actualAction = action.mortalEval.details[actualIndex];
                             if (actualAction.prob < badMoveUpperLimit / 100) {
                                 color = "#ff0000";
+                            } else if (actualAction.prob < badMoveUpperLimit2 / 100) {
+                                color = "#ffff00";
                             } else {
                                 color = "#ffffff";
                             }
@@ -123,10 +127,17 @@
     chrome.storage.sync.get(
         {
             badMoveUpperLimit: 5,
+            badMoveUpperLimit2: 10,
             port: 12139
         }, (items) => {
             badMoveUpperLimit = items.badMoveUpperLimit;
+            badMoveUpperLimit2 = items.badMoveUpperLimit2;
             server = `http://localhost:${items.port}`;
+
+            // 总是把宽松的放在2号位
+            if (badMoveUpperLimit2 < badMoveUpperLimit) {
+                [badMoveUpperLimit, badMoveUpperLimit2] = [badMoveUpperLimit2, badMoveUpperLimit];
+            }
 
             const resultElem = document.createElement("div");
             resultElem.id = "mortal-plus-result";
@@ -142,10 +153,11 @@
 
     function getReportData() {
         // 获取报告数据中的一致率和评分
-        evalMain("get_report_data.js", badMoveUpperLimit, function (data) {
+        evalMain("get_report_data.js", [badMoveUpperLimit, badMoveUpperLimit2], function (data) {
             match = data.match;
             rating = data.rating;
             badMoveCount = data.badMoveCount;
+            badMoveCount2 = data.badMoveCount2;
             actionCount = data.actionCount;
 
             addBadMove();
@@ -157,16 +169,17 @@
     }
 
     function addBadMove() {
+        let lang = "en";
+
         const badMoveVal = badMoveCount / actionCount;
         badMove = (100 * badMoveVal).toFixed(3);
 
         // 创建恶手率节点
         const badMoveTr = document.createElement("tr");
         const badMoveTd = document.createElement("td");
-        badMoveTd.textContent = "Bad moves/total";
         badMoveTr.appendChild(badMoveTd);
         const badMoveValueTd = document.createElement("td");
-        badMoveValueTd.textContent = `${badMoveCount}/${actionCount} = ${(100 * badMoveCount / actionCount).toPrecision(2)}%`;
+        badMoveValueTd.textContent = `${badMoveCount}/${actionCount} = ${(100 * badMoveCount / actionCount).toPrecision(3)}%`;
         badMoveTr.appendChild(badMoveValueTd);
 
         // 搜索一致率节点
@@ -177,17 +190,41 @@
         for (let trIndex = 0, count = tbody.children.length; trIndex !== count; ++trIndex) {
             const tr = tbody.children[trIndex];
             const td = tr.children[0];
+            // 大小写导致的
             if (td.textContent === "Matches/total") {
+                badMoveTd.textContent = badMoveUpperLimit + "% Bad moves/total";
                 matchRatioTr = tr;
             }
             // 不认语言导致的
             else if (td.textContent === "AI 一致率") {
-                badMoveTr.children[0].textContent = "恶手率";
+                lang = "zh-CN";
+                badMoveTr.children[0].textContent = badMoveUpperLimit + "% 恶手率";
                 matchRatioTr = tr;
             }
         }
         // 把恶手率节点添加到一致率后
         tbody.insertBefore(badMoveTr, matchRatioTr.nextSibling);
+
+        if (badMoveUpperLimit2 !== badMoveUpperLimit) {
+            const badMoveVal2 = badMoveCount2 / actionCount;
+            badMove2 = (100 * badMoveVal2).toFixed(3);
+
+            // 创建恶手率节点
+            const badMoveTr2 = document.createElement("tr");
+            const badMoveTd2 = document.createElement("td");
+            badMoveTr2.appendChild(badMoveTd2);
+            const badMoveValueTd2 = document.createElement("td");
+            badMoveValueTd2.textContent = `${badMoveCount2}/${actionCount} = ${(100 * badMoveCount2 / actionCount).toPrecision(3)}%`;
+            badMoveTr2.appendChild(badMoveValueTd2);
+
+            if (lang === "zh-CN") {
+                badMoveTd2.textContent = badMoveUpperLimit2 + "% 恶手率";
+            } else {
+                badMoveTd2.textContent = badMoveUpperLimit2 + "% Bad moves/total";
+            }
+
+            tbody.insertBefore(badMoveTr2, badMoveTr.nextSibling);
+        }
     }
 
     // 保存到excel按钮
@@ -199,7 +236,7 @@
         metadata.parentNode.insertBefore(p, metadata.nextSibling);
 
         const saveButton = document.createElement("button");
-        saveButton.textContent = "Save to Excel";
+        saveButton.textContent = i18nText.saveToExcel;
         metadata.parentNode.insertBefore(saveButton, p.nextSibling);
 
         const saveStatus = document.createElement("span");

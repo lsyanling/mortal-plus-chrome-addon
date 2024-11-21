@@ -8,6 +8,7 @@
     const rating = (100 * review.rating).toFixed(3);
 
     let badMoveCount = 0;
+    let badMoveCount2 = 0;
     let actionCount = 0;
     for (const roundActions of GS.ge) {
         for (const action of roundActions) {
@@ -16,8 +17,11 @@
 
                 const mortalEval = action.mortalEval;
                 const detail = mortalEval.details[mortalEval.actual_index];
-                if (detail.prob < badMoveUpperLimit / 100) {
-                    ++badMoveCount;
+                if (detail.prob < badMoveUpperLimit2 / 100) {
+                    ++badMoveCount2;
+                    if (detail.prob < badMoveUpperLimit / 100) {
+                        ++badMoveCount;
+                    }
                 }
             }
         }
@@ -27,6 +31,7 @@
         match: match,
         rating: rating,
         badMoveCount: badMoveCount,
+        badMoveCount2: badMoveCount2,
         actionCount: actionCount
     });
 }

@@ -1,5 +1,6 @@
 {
     let badMoveUpperLimit = 5;
+    let badMoveUpperLimit2 = 10;
     let server = "http://localhost:12139";
 
     let ratingExists = false;
@@ -11,11 +12,17 @@
     chrome.storage.sync.get(
         {
             badMoveUpperLimit: 5,
+            badMoveUpperLimit2: 10,
             port: 12139
         }, (items) => {
             badMoveUpperLimit = items.badMoveUpperLimit;
+            badMoveUpperLimit2 = items.badMoveUpperLimit2;
             server = `http://localhost:${items.port}`;
 
+            // 总是把宽松的放在2号位
+            if (badMoveUpperLimit2 < badMoveUpperLimit) {
+                [badMoveUpperLimit, badMoveUpperLimit2] = [badMoveUpperLimit2, badMoveUpperLimit];
+            }
             addBadMove();
             addButton();
         }
@@ -59,6 +66,7 @@
     function addBadMove() {
 
         let badChooseNum = 0;
+        let badChooseNum2 = 0;
 
         const orderLosses = document.getElementsByClassName("order-loss");
         for (let i = 0, length = orderLosses.length; i !== length; ++i) {
@@ -79,13 +87,21 @@
 
             const chosenWeight = parseInt(intSpan.textContent);
 
-            if (chosenWeight < badMoveUpperLimit) {
+            // 恶手标注
+            if (chosenWeight < badMoveUpperLimit2) {
                 const badChooseNode = document.createElement("span");
-                badChooseNode.innerHTML = ` \u00A0\u00A0\u00A0${i18nText.badMove}`;
-                badChooseNode.style.color = "#f55";
+                // 大恶手
+                if (chosenWeight < badMoveUpperLimit) {
+                    badChooseNode.innerHTML = ` \u00A0\u00A0\u00A0${badMoveUpperLimit}% ${i18nText.badMove}`;
+                    badChooseNode.style.color = "#ff0000";
+                    badChooseNum++;
+                } else {
+                    badChooseNode.innerHTML = ` \u00A0\u00A0\u00A0${badMoveUpperLimit2}% ${i18nText.badMove}`;
+                    badChooseNode.style.color = "#0000ff";
+                }
                 turnInfo.appendChild(badChooseNode);
 
-                badChooseNum++;
+                badChooseNum2++;
             }
         }
 
@@ -132,12 +148,30 @@
         // 计算恶手率
         const badMoveRatio = (100 * badChooseNum / chooseNum).toFixed(3);
         badMove = badMoveRatio.toString();
+        const badMoveRatio2 = (100 * badChooseNum2 / chooseNum).toFixed(3);
+        badMove = badMoveRatio2.toString();
 
         const badChooseRatioDt = document.createElement("dt");
-        badChooseRatioDt.innerHTML = i18nText.badMoveRatio;
+        badChooseRatioDt.innerHTML = badMoveUpperLimit + "% " + i18nText.badMoveRatio;
         const badChooseRatioDd = document.createElement("dd");
         badChooseRatioDd.innerHTML = `${badChooseNum}/${chooseNum} = ${badMoveRatio}%`;
         metaDataDl.insertBefore(badChooseRatioDd, version);
         metaDataDl.insertBefore(badChooseRatioDt, badChooseRatioDd);
+
+        // 恶手率标红
+        badChooseRatioDt.style.color = "#ff0000";
+        badChooseRatioDd.style.color = "#ff0000";
+
+        if (badMoveUpperLimit2 !== badMoveUpperLimit) {
+            const badChooseRatioDt2 = document.createElement("dt");
+            badChooseRatioDt2.innerHTML = badMoveUpperLimit2 + "% " + i18nText.badMoveRatio;
+            const badChooseRatioDd2 = document.createElement("dd");
+            badChooseRatioDd2.innerHTML = `${badChooseNum2}/${chooseNum} = ${badMoveRatio2}%`;
+            metaDataDl.insertBefore(badChooseRatioDd2, version);
+            metaDataDl.insertBefore(badChooseRatioDt2, badChooseRatioDd2);
+
+            badChooseRatioDt2.style.color = "#0000ff";
+            badChooseRatioDd2.style.color = "#0000ff";
+        }
     }
 }

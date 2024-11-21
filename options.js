@@ -6,6 +6,7 @@ const saveOptions = () => {
     const temperatureInput = document.getElementById("temperatureInput");
     const showRatingInput = document.getElementById("showRatingInput");
     const badMoveUpperLimit = document.getElementById("badMoveUpperLimitInput");
+    const badMoveUpperLimit2 = document.getElementById("badMoveUpperLimitInput2");
 
     chrome.storage.sync.set(
         {
@@ -16,8 +17,9 @@ const saveOptions = () => {
             temperatureExists: temperatureInput.value !== "",
             temperature: temperatureInput.valueAsNumber,
             showRating: showRatingInput.checked,
-            badMoveUpperLimit: badMoveUpperLimit.value
-        }, () => {}
+            badMoveUpperLimit: badMoveUpperLimit.value,
+            badMoveUpperLimit2: badMoveUpperLimit2.value
+        }, () => { }
     );
 }
 
@@ -29,6 +31,7 @@ const restoreOptions = () => {
     const temperatureInput = document.getElementById("temperatureInput");
     const showRatingInput = document.getElementById("showRatingInput");
     const badMoveUpperLimit = document.getElementById("badMoveUpperLimitInput");
+    const badMoveUpperLimit2 = document.getElementById("badMoveUpperLimitInput2");
 
     chrome.storage.sync.get(
         {
@@ -39,7 +42,8 @@ const restoreOptions = () => {
             temperatureExists: false,
             temperature: 0,
             showRating: true,
-            badMoveUpperLimit: 5
+            badMoveUpperLimit: 5,
+            badMoveUpperLimit2: 10
         }, (items) => {
             serverPortInput.valueAsNumber = items.port;
             detectClipboardInput.checked = items.detectClipboard;
@@ -50,6 +54,7 @@ const restoreOptions = () => {
             }
             showRatingInput.checked = items.showRating;
             badMoveUpperLimit.value = items.badMoveUpperLimit.toString();
+            badMoveUpperLimit2.value = items.badMoveUpperLimit2.toString();
         }
     );
 }
