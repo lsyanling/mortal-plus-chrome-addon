@@ -336,11 +336,11 @@
         // 使用 Set 来记录已出现的字符
         const seen = new Set();
         
-        // 逆序遍历字符串，最后一个出现的字符会被保留
+        // 逆序遍历字符串
         let result = '';
-        for (let i = str.length - 1; i >= 0; i--) {
+        for (let i = str.length - 3; i >= 0; i--) {
             let char = str[i];
-            
+
             // 如果字符在要删除的字符集合内，并且之前没有出现过，则保留
             if (charsToRemove.includes(char) && !seen.has(char)) {
                 seen.add(char);  // 记录该字符
@@ -349,7 +349,8 @@
                 result = char + result;  // 其他字符直接添加
             }
         }
-        
+        // 对摸进的牌单独处理
+        result = result + str.slice(-2);
         return result;
     }
     
