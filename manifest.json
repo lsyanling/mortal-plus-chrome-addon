@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Mortal Plus",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "description": "Mortal 魔氏辅助",
     "permissions": [
         "storage"
@@ -55,7 +55,8 @@
                 "get_report_data.js",
                 "get_round_data.js",
                 "get_round_index.js",
-                "set_action_index.js"
+                "set_action_index.js",
+                "get_hand.js"
             ],
             "matches": [
                 "<all_urls>"

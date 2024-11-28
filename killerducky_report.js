@@ -13,6 +13,8 @@
     let badMoveCount2 = 0;
     let actionCount = 0;
 
+    let lang = "en";
+
     const roundPreview = {
         element: null,
         pointer: null,
@@ -165,11 +167,11 @@
             roundPreview.createElement();
             roundPreview.updateRound(0);
             addListener();
+            addTenhouButton();
         });
     }
 
     function addBadMove() {
-        let lang = "en";
 
         const badMoveVal = badMoveCount / actionCount;
         badMove = (100 * badMoveVal).toFixed(3);
@@ -305,4 +307,50 @@
     function getRoundIndex(callback) {
         return evalMain("get_round_index.js", null, callback);
     }
+
+    function addTenhouButton() {
+        const killerCallDiv = document.getElementsByClassName("killer-call-div")[0];
+
+        const tenhouButton = document.createElement("button");
+        if(lang === "en") {
+            tenhouButton.textContent = "Link to Tenhou 牌理";
+        }
+        else{
+            tenhouButton.textContent = "跳转到 天凤牌理";
+        }
+        killerCallDiv.insertBefore(tenhouButton, killerCallDiv.lastChild);
+
+        tenhouButton.addEventListener("click", _ => {
+            evalMain("get_hand.js", null, function(data){
+                let handtile = removeDuplicates(data);
+                const url = `https://tenhou.net/2/?q=${handtile}`;
+                window.open(url, "_blank");
+            });
+        });
+    }
+
+    function removeDuplicates(str) {
+        // 要去除重复的字符集合
+        const charsToRemove = ['m', 'p', 's', 'z'];
+        
+        // 使用 Set 来记录已出现的字符
+        const seen = new Set();
+        
+        // 逆序遍历字符串，最后一个出现的字符会被保留
+        let result = '';
+        for (let i = str.length - 1; i >= 0; i--) {
+            let char = str[i];
+            
+            // 如果字符在要删除的字符集合内，并且之前没有出现过，则保留
+            if (charsToRemove.includes(char) && !seen.has(char)) {
+                seen.add(char);  // 记录该字符
+                result = char + result;  // 添加到结果字符串的开头
+            } else if (!charsToRemove.includes(char)) {
+                result = char + result;  // 其他字符直接添加
+            }
+        }
+        
+        return result;
+    }
+    
 }
